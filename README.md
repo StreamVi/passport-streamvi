@@ -30,7 +30,7 @@ import passport from 'passport';
 import { StreamViStrategy } from 'passport-streamvi';
 
 passport.use(
-  new SenlerStrategy({
+  new StreamViStrategy({
     clientID: 'ВАШ_STREAMVI_CLIENT_ID',
     clientSecret: 'ВАШ_STREAMVI_CLIENT_SECRET',
     callbackURL: 'https://yourapp.com/auth/streamvi/callback',
@@ -39,10 +39,10 @@ passport.use(
 
 const app = express();
 
-// Инициализация маршрута аутентификации через Senler
+// Инициализация маршрута аутентификации через StreamVi
 app.get('/auth/streamvi', passport.authenticate('streamvi'));
 
-// Обработчик обратного вызова для Senler
+// Обработчик обратного вызова для StreamVi
 app.get(
   '/auth/streamvi/callback',
   passport.authenticate('streamvi', {
@@ -73,7 +73,7 @@ app.listen(3000, () => {
     - `/auth/streamvi/callback`: Обрабатывает обратный вызов от **StreamVi** после аутентификации. Если аутентификация успешна, объект пользователя будет доступен через `req.user`.
 
 3. **Обработка ошибок**:
-    - В случае неудачной аутентификации пользователи будут перенаправлены на `/auth/senler/error`.
+    - В случае неудачной аутентификации пользователи будут перенаправлены на `/auth/streamvi/error`.
 
 4. **Отключение сессий**:
     - Опция `session: false` предотвращает сериализацию пользователя в сессии, её функционал бесполезен в данном контексте и включение будет приводить к ошибке
