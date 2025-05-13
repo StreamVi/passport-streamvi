@@ -1,12 +1,7 @@
 import axios from 'axios';
 import { Request } from 'express';
-import { Strategy as OAuth2Strategy, StrategyOptions, VerifyFunction } from 'passport-oauth2';
-
-interface StreamViStrategyOptions extends StrategyOptions {
-  projectID?: string;
-  clientSecret: string;
-  callbackURL: string;
-}
+import { Strategy as OAuth2Strategy, VerifyFunction } from 'passport-oauth2';
+import { StreamViStrategyOptions, StreamViTokenResponse, StreamViUser, StreamViAuthRequest } from './types';
 
 const authorizationURL = 'https://streamvi.io/cabinet/oauth';
 const tokenURL = 'https://api-v2.streamvi.io/site/oauth/token';
@@ -32,9 +27,9 @@ export class StreamViStrategy extends OAuth2Strategy {
     this._clientID = options.clientID;
   }
 
-  async authenticate(req: Request, options?: object): Promise<void> {
-    const authorizationCode = req.query.code?.toString()!;
-    this._projectID = req.query.group_id?.toString()!;
+  async authenticate(req: Request<{}, {}, {}, StreamViAuthRequest>, options?: object): Promise<void> {
+    const authorizationCode = req.query.code;
+    this._projectID = req.query.group_id || '';
 
     if (!authorizationCode) {
       return super.authenticate(req, options);
@@ -42,7 +37,8 @@ export class StreamViStrategy extends OAuth2Strategy {
 
     try {
       const accessToken = await this.getAccessToken(authorizationCode);
-      this.success({ accessToken });
+      const user: StreamViUser = { accessToken };
+      this.success(user);
     } catch (error) {
       this.fail(`Failed to exchange authorization code: ${error}`);
     }
@@ -50,12 +46,12 @@ export class StreamViStrategy extends OAuth2Strategy {
 
   async getAccessToken(authorizationCode: string): Promise<string> {
     try {
-      const response = await axios.get(this._tokenURL, {
+      const response = await axios.get<StreamViTokenResponse>(this._tokenURL, {
         params: {
           grant_type: 'authorization_code',
           client_id: this._clientID,
           client_secret: this._clientSecret,
-          redirect_uri: this._callbackURL, // Must match the registered callback URL
+          redirect_uri: this._callbackURL,
           code: authorizationCode,
           project_id: this._projectID,
         },
@@ -71,3 +67,5 @@ export class StreamViStrategy extends OAuth2Strategy {
     }
   }
 }
+
+export * from './types';
