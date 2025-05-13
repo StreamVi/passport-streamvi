@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Request } from 'express';
 import { Strategy as OAuth2Strategy, VerifyFunction } from 'passport-oauth2';
-import { StreamViStrategyOptions, StreamViTokenResponse, StreamViUser, StreamViAuthRequest } from './types';
+import { StreamViStrategyOptions, StreamViTokenResponse, StreamViUser } from './types';
 
 const authorizationURL = 'https://streamvi.io/cabinet/oauth';
 const tokenURL = 'https://api-v2.streamvi.io/site/oauth/token';
@@ -27,9 +27,9 @@ export class StreamViStrategy extends OAuth2Strategy {
     this._clientID = options.clientID;
   }
 
-  async authenticate(req: Request<{}, {}, {}, StreamViAuthRequest>, options?: object): Promise<void> {
-    const authorizationCode = req.query.code;
-    this._projectID = req.query.group_id || '';
+  async authenticate(req: Request, options?: object): Promise<void> {
+    const authorizationCode = req.query.code as string;
+    this._projectID = (req.query.group_id as string) || '';
 
     if (!authorizationCode) {
       return super.authenticate(req, options);

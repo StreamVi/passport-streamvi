@@ -8,12 +8,12 @@ export interface StreamViStrategyOptions extends StrategyOptions {
    * ID проекта в StreamVi
    */
   projectID?: string;
-  
+
   /**
    * Секретный ключ клиента
    */
   clientSecret: string;
-  
+
   /**
    * URL для обратного вызова после авторизации
    */
@@ -28,17 +28,17 @@ export interface StreamViTokenResponse {
    * Токен доступа
    */
   access_token: string;
-  
+
   /**
    * Тип токена
    */
   token_type: string;
-  
+
   /**
    * Время жизни токена в секундах
    */
   expires_in: number;
-  
+
   /**
    * Области доступа
    */
@@ -63,9 +63,9 @@ export interface StreamViAuthRequest {
    * Код авторизации
    */
   code?: string;
-  
+
   /**
    * ID группы проекта
    */
   group_id?: string;
-} 
+}
