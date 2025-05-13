@@ -61,7 +61,7 @@ export class StreamViStrategy extends OAuth2Strategy {
         return response.data.access_token;
       }
 
-      throw new Error('No access token in response');
+      throw new Error(`No access token in response. Response data: ${JSON.stringify(response.data)}`);
     } catch (error) {
       throw new Error(`Failed to get access token: ${error}`);
     }

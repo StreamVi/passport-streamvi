@@ -6,7 +6,8 @@
     "importHelpers": true,
     "declaration": true,
     "sourceMap": true,
-    "rootDir": "./",
+    "rootDir": "./src",
+    "outDir": "./dist",
     "strict": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
@@ -17,8 +18,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "noEmit": true,
     "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
+    "experimentalDecorators": true
   }
 }
