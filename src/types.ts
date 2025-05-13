@@ -10,6 +10,11 @@ export interface StreamViStrategyOptions extends StrategyOptions {
   projectID?: string;
 
   /**
+   * ID клиента
+   */
+  clientID: string;
+
+  /**
    * Секретный ключ клиента
    */
   clientSecret: string;
@@ -46,6 +51,17 @@ export interface StreamViTokenResponse {
 }
 
 /**
+ * Профиль пользователя
+ */
+export interface StreamViProfile {
+  id: string;
+  username: string;
+  displayName: string;
+  emails?: Array<{ value: string; type?: string }>;
+  photos?: Array<{ value: string; type?: string }>;
+}
+
+/**
  * Пользовательский объект, который будет доступен после успешной аутентификации
  */
 export interface StreamViUser {
@@ -53,6 +69,16 @@ export interface StreamViUser {
    * Токен доступа
    */
   accessToken: string;
+
+  /**
+   * Токен обновления
+   */
+  refreshToken?: string;
+
+  /**
+   * Профиль пользователя
+   */
+  profile?: StreamViProfile;
 }
 
 /**

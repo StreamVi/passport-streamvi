@@ -4,9 +4,9 @@ declare module 'passport-streamvi' {
 
   export interface StreamViStrategyOptions {
     projectID?: string;
+    clientID: string;
     clientSecret: string;
     callbackURL: string;
-    clientID: string;
   }
 
   export interface StreamViTokenResponse {
@@ -16,12 +16,30 @@ declare module 'passport-streamvi' {
     scope: string;
   }
 
+  export interface StreamViProfile {
+    id: string;
+    username: string;
+    displayName: string;
+    emails?: Array<{ value: string; type?: string }>;
+    photos?: Array<{ value: string; type?: string }>;
+  }
+
   export interface StreamViUser {
     accessToken: string;
+    refreshToken?: string;
+    profile?: StreamViProfile;
   }
 
   export class StreamViStrategy extends OAuth2Strategy {
-    constructor(options: Omit<StreamViStrategyOptions, 'authorizationURL' | 'tokenURL'>, verify?: (token: string, refreshToken: string, profile: any, done: (error: any, user?: any) => void) => void);
+    constructor(
+      options: Omit<StreamViStrategyOptions, 'authorizationURL' | 'tokenURL'>,
+      verify: (
+        accessToken: string,
+        refreshToken: string,
+        profile: StreamViProfile,
+        done: (error: any, user?: StreamViUser) => void
+      ) => void
+    );
     authenticate(req: Request, options?: object): Promise<void>;
     getAccessToken(authorizationCode: string): Promise<string>;
   }
