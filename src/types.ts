@@ -52,12 +52,12 @@ export interface StreamViTokenResponse {
   /**
    * ID проекта
    */
-  project_id?: string | number;
+  project_id: string;
 
   /**
    * Внешний ID проекта
    */
-  project_external_id?: string;
+  project_external_id: string;
 }
 
 /**
@@ -93,5 +93,10 @@ export interface StreamViUser {
   /**
    * ID проекта
    */
-  projectId?: string | number;
+  projectId?: string;
+
+  /**
+   * Символьный ID проекта
+   */
+  projectExternalId: string,
 }

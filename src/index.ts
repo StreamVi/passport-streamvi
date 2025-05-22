@@ -41,6 +41,7 @@ export class StreamViStrategy extends OAuth2Strategy {
         const user: StreamViUser = {
           accessToken: tokenResponse.access_token,
           projectId: tokenResponse.projectID || this._projectID,
+          projectExternalId: tokenResponse.projectExternalID || '',
         };
         this.success(user);
       })
@@ -49,7 +50,7 @@ export class StreamViStrategy extends OAuth2Strategy {
       });
   }
 
-  async getAccessToken(authorizationCode: string): Promise<{ access_token: string; projectID: number | string, projectExternalID: string }> {
+  async getAccessToken(authorizationCode: string): Promise<{ access_token: string; projectID: string, projectExternalID: string }> {
     // Preparing request parameters in the correct format
     const params = new URLSearchParams();
     params.append('grant_type', 'authorization_code');
@@ -66,14 +67,15 @@ export class StreamViStrategy extends OAuth2Strategy {
         params.toString(), // Converting URLSearchParams to string
         {
           headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
+            'Content-Type': 'application/x-www-form-urlencoded',
+            // Removing 'Accept' header that's not in the working example
           },
         },
       );
       if (response.data && response.data.access_token) {
         return {
           access_token: response.data.access_token,
-          projectID: response.data.project_id || 0,
+          projectID: response.data.project_id || '',
           projectExternalID: response.data.project_external_id || '',
         };
       }
