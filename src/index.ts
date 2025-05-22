@@ -46,15 +46,13 @@ export class StreamViStrategy extends OAuth2Strategy {
 
   async getAccessToken(authorizationCode: string): Promise<string> {
     try {
-      const response = await axios.get<StreamViTokenResponse>(this._tokenURL, {
-        params: {
-          grant_type: 'authorization_code',
-          client_id: this._clientID,
-          client_secret: this._clientSecret,
-          redirect_uri: this._callbackURL,
-          code: authorizationCode,
-          project_id: this._projectID,
-        },
+      const response = await axios.post<StreamViTokenResponse>(this._tokenURL, {
+        grant_type: 'authorization_code',
+        client_id: this._clientID,
+        client_secret: this._clientSecret,
+        redirect_uri: this._callbackURL,
+        code: authorizationCode,
+        project_id: this._projectID,
       });
 
       if (response.data && response.data.access_token) {
