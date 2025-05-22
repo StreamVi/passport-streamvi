@@ -48,6 +48,11 @@ export interface StreamViTokenResponse {
    * Области доступа
    */
   scope: string;
+  
+  /**
+   * ID проекта
+   */
+  project_id?: string;
 }
 
 /**

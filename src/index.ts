@@ -36,11 +36,11 @@ export class StreamViStrategy extends OAuth2Strategy {
     }
 
     this.getAccessToken(authorizationCode)
-      .then((accessToken) => {
+      .then((tokenResponse) => {
         // Adding projectId to user object
         const user: StreamViUser = {
-          accessToken,
-          projectId: this._projectID,
+          accessToken: tokenResponse.access_token,
+          projectId: tokenResponse.project_id || this._projectID,
         };
         this.success(user);
       })
@@ -49,7 +49,7 @@ export class StreamViStrategy extends OAuth2Strategy {
       });
   }
 
-  async getAccessToken(authorizationCode: string): Promise<string> {
+  async getAccessToken(authorizationCode: string): Promise<{ access_token: string; project_id?: string }> {
     // Preparing request parameters in the correct format
     const params = new URLSearchParams();
     params.append('grant_type', 'authorization_code');
@@ -72,7 +72,10 @@ export class StreamViStrategy extends OAuth2Strategy {
         },
       );
       if (response.data && response.data.access_token) {
-        return response.data.access_token;
+        return {
+          access_token: response.data.access_token,
+          project_id: response.data.project_id,
+        };
       }
 
       throw new Error(`No access token in response. Response data: ${JSON.stringify(response.data)}`);
