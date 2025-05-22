@@ -4,13 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="44746fba-3c4b-4647-b7b6-bac97d53d73f" name="Changes" comment="fix types">
-      <change beforePath="$PROJECT_DIR$/.idea/php.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/package.json" beforeDir="false" afterPath="$PROJECT_DIR$/package.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/types.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/types.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/types/passport-streamvi.d.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/types/passport-streamvi.d.ts" afterDir="false" />
-    </list>
+    <list default="true" id="44746fba-3c4b-4647-b7b6-bac97d53d73f" name="Changes" comment="fix types" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -96,6 +90,7 @@
       <workItem from="1746627646067" duration="1197000" />
       <workItem from="1747131088142" duration="725000" />
       <workItem from="1747132182576" duration="1293000" />
+      <workItem from="1747222108741" duration="70000" />
     </task>
     <task id="LOCAL-00001" summary="fix types">
       <option name="closed" value="true" />
