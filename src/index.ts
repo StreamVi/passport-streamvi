@@ -30,17 +30,17 @@ export class StreamViStrategy extends OAuth2Strategy {
   authenticate(req: Request, options?: any): void {
     const authorizationCode = req.query.code as string;
     this._projectID = (req.query.project_id as string) || '';
-    
+
     if (!authorizationCode) {
       return super.authenticate(req, options);
     }
-    
+
     this.getAccessToken(authorizationCode)
       .then((accessToken) => {
         // Adding projectId to user object
-        const user: StreamViUser = { 
+        const user: StreamViUser = {
           accessToken,
-          projectId: this._projectID 
+          projectId: this._projectID,
         };
         this.success(user);
       })
@@ -50,7 +50,6 @@ export class StreamViStrategy extends OAuth2Strategy {
   }
 
   async getAccessToken(authorizationCode: string): Promise<string> {
-    
     // Preparing request parameters in the correct format
     const params = new URLSearchParams();
     params.append('grant_type', 'authorization_code');
@@ -59,19 +58,18 @@ export class StreamViStrategy extends OAuth2Strategy {
     params.append('redirect_uri', this._callbackURL);
     params.append('code', authorizationCode);
     params.append('project_id', this._projectID);
-    
+
     try {
-      
       // Sending request with correct headers and parameters as in the working example
       const response = await axios.post<StreamViTokenResponse>(
-        this._tokenURL, 
+        this._tokenURL,
         params.toString(), // Converting URLSearchParams to string
         {
           headers: {
-            'Content-Type': 'application/x-www-form-urlencoded'
+            'Content-Type': 'application/x-www-form-urlencoded',
             // Removing 'Accept' header that's not in the working example
-          }
-        }
+          },
+        },
       );
       if (response.data && response.data.access_token) {
         return response.data.access_token;
@@ -84,4 +82,4 @@ export class StreamViStrategy extends OAuth2Strategy {
   }
 }
 
-export * from './types'; 
+export * from './types';

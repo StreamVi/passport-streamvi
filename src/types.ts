@@ -80,7 +80,6 @@ export interface StreamViUser {
    */
   profile?: StreamViProfile;
 
-  
   /**
    * ID проекта
    */

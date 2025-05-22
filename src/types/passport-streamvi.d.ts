@@ -33,14 +33,9 @@ declare module 'passport-streamvi' {
   export class StreamViStrategy extends OAuth2Strategy {
     constructor(
       options: Omit<StreamViStrategyOptions, 'authorizationURL' | 'tokenURL'>,
-      verify: (
-        accessToken: string,
-        refreshToken: string,
-        profile: StreamViProfile,
-        done: (error: any, user?: StreamViUser) => void
-      ) => void
+      verify: (accessToken: string, refreshToken: string, profile: StreamViProfile, done: (error: any, user?: StreamViUser) => void) => void,
     );
     authenticate(req: Request, options?: object): Promise<void>;
     getAccessToken(authorizationCode: string): Promise<string>;
   }
-} 
+}
