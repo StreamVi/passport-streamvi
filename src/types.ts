@@ -79,19 +79,10 @@ export interface StreamViUser {
    * Профиль пользователя
    */
   profile?: StreamViProfile;
-}
 
-/**
- * Параметры запроса при аутентификации
- */
-export interface StreamViAuthRequest {
+  
   /**
-   * Код авторизации
+   * ID проекта
    */
-  code?: string;
-
-  /**
-   * ID группы проекта
-   */
-  group_id?: string;
+  projectId?: string;
 }

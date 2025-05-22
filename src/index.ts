@@ -27,43 +27,61 @@ export class StreamViStrategy extends OAuth2Strategy {
     this._clientID = options.clientID;
   }
 
-  async authenticate(req: Request, options?: object): Promise<void> {
+  authenticate(req: Request, options?: any): void {
     const authorizationCode = req.query.code as string;
-    this._projectID = (req.query.group_id as string) || '';
-
+    this._projectID = (req.query.project_id as string) || '';
+    
     if (!authorizationCode) {
       return super.authenticate(req, options);
     }
-
-    try {
-      const accessToken = await this.getAccessToken(authorizationCode);
-      const user: StreamViUser = { accessToken };
-      this.success(user);
-    } catch (error) {
-      this.fail(`Failed to exchange authorization code: ${error}`);
-    }
+    
+    this.getAccessToken(authorizationCode)
+      .then((accessToken) => {
+        // Adding projectId to user object
+        const user: StreamViUser = { 
+          accessToken,
+          projectId: this._projectID 
+        };
+        this.success(user);
+      })
+      .catch((error) => {
+        this.fail(`Failed to exchange authorization code: ${error}`);
+      });
   }
 
   async getAccessToken(authorizationCode: string): Promise<string> {
+    
+    // Preparing request parameters in the correct format
+    const params = new URLSearchParams();
+    params.append('grant_type', 'authorization_code');
+    params.append('client_id', this._clientID);
+    params.append('client_secret', this._clientSecret);
+    params.append('redirect_uri', this._callbackURL);
+    params.append('code', authorizationCode);
+    params.append('project_id', this._projectID);
+    
     try {
-      const response = await axios.post<StreamViTokenResponse>(this._tokenURL, {
-        grant_type: 'authorization_code',
-        client_id: this._clientID,
-        client_secret: this._clientSecret,
-        redirect_uri: this._callbackURL,
-        code: authorizationCode,
-        project_id: this._projectID,
-      });
-
+      
+      // Sending request with correct headers and parameters as in the working example
+      const response = await axios.post<StreamViTokenResponse>(
+        this._tokenURL, 
+        params.toString(), // Converting URLSearchParams to string
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+            // Removing 'Accept' header that's not in the working example
+          }
+        }
+      );
       if (response.data && response.data.access_token) {
         return response.data.access_token;
       }
 
       throw new Error(`No access token in response. Response data: ${JSON.stringify(response.data)}`);
-    } catch (error) {
+    } catch (error: any) {
       throw new Error(`Failed to get access token: ${error}`);
     }
   }
 }
 
-export * from './types';
+export * from './types'; 
