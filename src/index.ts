@@ -16,7 +16,13 @@ export class StreamViStrategy extends OAuth2Strategy {
   constructor(options: Omit<StreamViStrategyOptions, 'authorizationURL' | 'tokenURL'>, verify?: VerifyFunction) {
     options.projectID = options.projectID || '';
 
-    super({ ...options, authorizationURL, tokenURL }, verify || ((): void => {}));
+    // Прокидываем pkce и state, если они заданы
+    const { pkce, state, ...rest } = options as any;
+    const strategyOptions = { ...rest, authorizationURL, tokenURL };
+    if (typeof pkce !== 'undefined') strategyOptions.pkce = pkce;
+    if (typeof state !== 'undefined') strategyOptions.state = state;
+
+    super(strategyOptions, verify || ((): void => {}));
 
     this.name = 'streamvi';
 
@@ -50,7 +56,7 @@ export class StreamViStrategy extends OAuth2Strategy {
       });
   }
 
-  async getAccessToken(authorizationCode: string): Promise<{ access_token: string; projectID: string, projectExternalID: string }> {
+  async getAccessToken(authorizationCode: string): Promise<{ access_token: string; projectID: string; projectExternalID: string }> {
     // Preparing request parameters in the correct format
     const params = new URLSearchParams();
     params.append('grant_type', 'authorization_code');

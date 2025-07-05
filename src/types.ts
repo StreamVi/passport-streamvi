@@ -23,6 +23,16 @@ export interface StreamViStrategyOptions extends StrategyOptions {
    * URL для обратного вызова после авторизации
    */
   callbackURL: string;
+
+  /**
+   * Включить PKCE (Proof Key for Code Exchange)
+   */
+  pkce?: boolean;
+
+  /**
+   * Включить state (рекомендуется для PKCE)
+   */
+  state?: boolean;
 }
 
 /**

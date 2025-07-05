@@ -7,6 +7,8 @@ declare module 'passport-streamvi' {
     clientID: string;
     clientSecret: string;
     callbackURL: string;
+    pkce?: boolean;
+    state?: boolean;
   }
 
   export interface StreamViTokenResponse {
