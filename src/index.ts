@@ -12,6 +12,7 @@ export class StreamViStrategy extends OAuth2Strategy {
   private _clientID: string;
   private _projectID: string;
   private _callbackURL: string;
+  private _pkceEnabled: boolean;
 
   constructor(options: Omit<StreamViStrategyOptions, 'authorizationURL' | 'tokenURL'>, verify?: VerifyFunction) {
     options.projectID = options.projectID || '';
@@ -31,6 +32,7 @@ export class StreamViStrategy extends OAuth2Strategy {
     this._projectID = options.projectID || '';
     this._tokenURL = tokenURL;
     this._clientID = options.clientID;
+    this._pkceEnabled = !!pkce;
   }
 
   authenticate(req: Request, options?: any): void {
@@ -41,7 +43,20 @@ export class StreamViStrategy extends OAuth2Strategy {
       return super.authenticate(req, options);
     }
 
-    this.getAccessToken(authorizationCode)
+    let code_verify = '';
+    if (this._pkceEnabled) {
+      const stateStore = (this as any)._stateStore;
+      const state = (req.query && req.query.state) || (req.body && req.body.state);
+      stateStore.verify(req, state, (err: any, ok: any) => {
+        if (err) {
+          this.fail(`Failed to verify code: ${err}`);
+        } else {
+          code_verify = ok;
+        }
+      });
+    }
+
+    this.getAccessToken(authorizationCode, code_verify)
       .then((tokenResponse) => {
         // Adding projectId to user object
         const user: StreamViUser = {
@@ -56,7 +71,7 @@ export class StreamViStrategy extends OAuth2Strategy {
       });
   }
 
-  async getAccessToken(authorizationCode: string): Promise<{ access_token: string; projectID: string; projectExternalID: string }> {
+  async getAccessToken(authorizationCode: string, codeVerifier?: string): Promise<{ access_token: string; projectID: string; projectExternalID: string }> {
     // Preparing request parameters in the correct format
     const params = new URLSearchParams();
     params.append('grant_type', 'authorization_code');
@@ -65,6 +80,10 @@ export class StreamViStrategy extends OAuth2Strategy {
     params.append('redirect_uri', this._callbackURL);
     params.append('code', authorizationCode);
     params.append('project_id', this._projectID);
+
+    if (codeVerifier) {
+      params.append('code_verifier', codeVerifier);
+    }
 
     try {
       // Sending request with correct headers and parameters as in the working example
