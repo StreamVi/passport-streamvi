@@ -6,6 +6,17 @@ import { StreamViStrategyOptions, StreamViTokenResponse, StreamViUser } from './
 const authorizationURL = 'https://streamvi.io/cabinet/oauth';
 const tokenURL = 'https://api-v2.streamvi.io/site/oauth/token';
 
+type StateCallback = (error: Error | null, verified?: boolean | string) => void;
+interface StateMetadata {
+  authorizationURL: string;
+  tokenURL: string;
+  clientID: string;
+  callbackURL: string;
+}
+interface StateStore {
+  verify(request: Request, state: unknown, ...args: [StateCallback] | [StateMetadata, StateCallback]): void;
+}
+
 export class StreamViStrategy extends OAuth2Strategy {
   private _clientSecret: string;
   private _tokenURL: string;
@@ -15,15 +26,7 @@ export class StreamViStrategy extends OAuth2Strategy {
   private _pkceEnabled: boolean;
 
   constructor(options: Omit<StreamViStrategyOptions, 'authorizationURL' | 'tokenURL'>, verify?: VerifyFunction) {
-    options.projectID = options.projectID || '';
-
-    // Прокидываем pkce и state, если они заданы
-    const { pkce, state, ...rest } = options as any;
-    const strategyOptions = { ...rest, authorizationURL, tokenURL };
-    if (typeof pkce !== 'undefined') strategyOptions.pkce = pkce;
-    if (typeof state !== 'undefined') strategyOptions.state = state;
-
-    super(strategyOptions, verify || ((): void => {}));
+    super({ ...options, authorizationURL, tokenURL }, verify || ((): void => {}));
 
     this.name = 'streamvi';
 
@@ -32,43 +35,66 @@ export class StreamViStrategy extends OAuth2Strategy {
     this._projectID = options.projectID || '';
     this._tokenURL = tokenURL;
     this._clientID = options.clientID;
-    this._pkceEnabled = !!pkce;
+    this._pkceEnabled = !!options.pkce;
   }
 
   authenticate(req: Request, options?: any): void {
-    const authorizationCode = req.query.code as string;
-    this._projectID = (req.query.project_id as string) || '';
-
-    if (!authorizationCode) {
+    const authorizationCode = req.query.code;
+    if (req.query.error || !authorizationCode) {
       return super.authenticate(req, options);
     }
-
-    let code_verify = '';
-    if (this._pkceEnabled) {
-      const stateStore = (this as any)._stateStore;
-      const state = (req.query && req.query.state) || (req.body && req.body.state);
-      stateStore.verify(req, state, (err: any, ok: any) => {
-        if (err) {
-          this.fail(`Failed to verify code: ${err}`);
-        } else {
-          code_verify = ok;
-        }
-      });
+    if (typeof authorizationCode !== 'string') {
+      this.fail({ message: 'Invalid authorization code.' }, 400);
+      return;
     }
-
-    this.getAccessToken(authorizationCode, code_verify)
-      .then((tokenResponse) => {
-        // Adding projectId to user object
-        const user: StreamViUser = {
-          accessToken: tokenResponse.access_token,
-          projectId: tokenResponse.projectID || this._projectID,
-          projectExternalId: tokenResponse.projectExternalID || '',
-        };
-        this.success(user);
-      })
-      .catch((error) => {
-        this.fail(`Failed to exchange authorization code: ${error}`);
-      });
+    this._projectID = typeof req.query.project_id === 'string' ? req.query.project_id : '';
+    const stateStore = (this as unknown as { _stateStore: StateStore })._stateStore;
+    const state = req.query.state || req.body?.state;
+    let completed = false;
+    const verified: StateCallback = (error, result): void => {
+      if (completed) return;
+      completed = true;
+      if (error) {
+        this.error(error);
+        return;
+      }
+      if (!result || (this._pkceEnabled && typeof result !== 'string')) {
+        this.fail({ message: 'Invalid authorization request state.' }, 403);
+        return;
+      }
+      // The store may be asynchronous. Exchange only after successful verification.
+      this.getAccessToken(authorizationCode, typeof result === 'string' ? result : undefined)
+        .then((tokenResponse) => {
+          const user: StreamViUser = {
+            accessToken: tokenResponse.access_token,
+            projectId: tokenResponse.projectID || this._projectID,
+            projectExternalId: tokenResponse.projectExternalID || '',
+          };
+          this.success(user);
+        })
+        .catch(() => {
+          this.fail({ message: 'Failed to exchange authorization code.' });
+        });
+    };
+    try {
+      if (stateStore.verify.length === 4) {
+        stateStore.verify(
+          req,
+          state,
+          {
+            authorizationURL,
+            tokenURL,
+            clientID: this._clientID,
+            callbackURL: this._callbackURL,
+          },
+          verified,
+        );
+      } else {
+        stateStore.verify(req, state, verified);
+      }
+    } catch (error) {
+      verified(error instanceof Error ? error : new Error('Failed to verify authorization request state.'));
+    }
   }
 
   async getAccessToken(authorizationCode: string, codeVerifier?: string): Promise<{ access_token: string; projectID: string; projectExternalID: string }> {
