@@ -1,6 +1,6 @@
 {
   "name": "passport-streamvi",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "author": "StreamVi",
   "homepage": "https://github.com/StreamVi/passport-streamvi#readme",
   "repository": {
@@ -22,7 +22,9 @@
     "start": "npm run build && node dist/index.js",
     "build": "microbundle",
     "lint": "eslint --fix",
-    "watch": "microbundle watch"
+    "watch": "microbundle watch",
+    "test": "node --test tests/*.test.cjs",
+    "prepare": "npm run build"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
@@ -39,7 +41,6 @@
     "ts-node": "^10.9.2",
     "tslib": "^2.7.0",
     "typescript": "^5.5.4",
-    "puppeteer": "^23.3.0",
     "microbundle": "^0.15.1"
   },
   "dependencies": {

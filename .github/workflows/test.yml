@@ -1,6 +1,8 @@
 name: Test
 
 on:
+  pull_request:
+    branches: ["main"]
   push:
     branches: ["main"]
 
@@ -23,3 +25,6 @@ jobs:
 
       - name: Test build
         run: npm run build
+
+      - name: Test OAuth state and PKCE
+        run: npm test

@@ -24,6 +24,9 @@ jobs:
       - name: Test build
         run: npm run build
 
+      - name: Test OAuth state and PKCE
+        run: npm test
+
   publish:
     runs-on: ubuntu-latest
     needs: test
